@@ -118,7 +118,7 @@ namespace AsterNET.NetStandard.FastAGI
                 #if LOGGER
                     logger.Error("Unexpected Exception while handling request", ex);
                 #else
-				    throw ex;
+				    throw ;
                 #endif
             }
 

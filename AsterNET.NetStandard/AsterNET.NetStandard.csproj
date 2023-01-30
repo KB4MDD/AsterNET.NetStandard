@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Description>asterNet library to support net Standard 2.0
 </Description>
     <Copyright></Copyright>
@@ -18,6 +18,10 @@
     <Version>2.2.2</Version>
     <AssemblyVersion>2.2.2.0</AssemblyVersion>
     <FileVersion>2.2.2.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;LOGGER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

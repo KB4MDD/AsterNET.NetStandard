@@ -1,3 +1,9 @@
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.Reflection;
+using System.Threading;
+
 namespace AsterNET.NetStandard
 {
 #if LOGGER
@@ -50,12 +56,12 @@ namespace AsterNET.NetStandard
 
         private void writeLine(string type, string msg)
         {
-            System.Diagnostics.Debug.Print("{0}[{1}] {2}", type, Thread.CurrentThread.Name, msg);
+            Console.WriteLine("{0}[{1}] {2}", type, Thread.CurrentThread.Name, msg);
         }
 
         private void writeLine(string msg)
         {
-            System.Diagnostics.Debug.Print(msg);
+            Console.WriteLine(msg);
         }
 
         // Max 2 calls from  original caller !

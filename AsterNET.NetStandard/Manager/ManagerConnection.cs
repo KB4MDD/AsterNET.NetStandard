@@ -613,6 +613,7 @@ namespace AsterNET.NetStandard.Manager
             Helper.RegisterEventHandler(registeredEventHandlers, 62, typeof(DisconnectEvent));
             Helper.RegisterEventHandler(registeredEventHandlers, 62, typeof(ReloadEvent));
             Helper.RegisterEventHandler(registeredEventHandlers, 62, typeof(ShutdownEvent));
+            Helper.RegisterEventHandler(registeredEventHandlers, 62, typeof(ReconnectEvent));
 
             Helper.RegisterEventHandler(registeredEventHandlers, 63, typeof(BridgeEvent));
             Helper.RegisterEventHandler(registeredEventHandlers, 64, typeof(TransferEvent));
@@ -693,7 +694,7 @@ namespace AsterNET.NetStandard.Manager
             get { return reconnectRetryFast; }
             set { reconnectRetryFast = value; }
         }
-        /// <summary> Default Maximum Reconnect retry counter.</summary>
+        /// <summary> Default Maximum Reconnect retry counter. Set to -1 for infinite.</summary>
         public int ReconnectRetryMax
         {
             get { return reconnectRetryMax; }
@@ -1760,7 +1761,7 @@ namespace AsterNET.NetStandard.Manager
 #if LOGGER
 			logger.Warning("reconnect (init: {0}), reconnectCount:{1}", init, reconnectCount);
 #endif
-            if (init)
+            if (init || reconnectRetryMax < 0)
                 reconnectCount = 0;
             else if (reconnectCount++ > reconnectRetryMax)
                 reconnectEnable = false;
@@ -1777,10 +1778,16 @@ namespace AsterNET.NetStandard.Manager
                 int retryCount = 0;
                 while (reconnectEnable && !mrReader.Die)
                 {
-                    if (retryCount >= reconnectRetryMax)
+                    if (reconnectRetryMax > 0 && retryCount >= reconnectRetryMax)
                         reconnectEnable = false;
                     else
                     {
+                        if(retryCount % 12 == 0)
+                        {
+                            enableEvents = true;
+                            fireEvent(new ReconnectEvent(this));
+                            enableEvents = true;
+                        }
                         try
                         {
                             if (retryCount < reconnectRetryFast)
@@ -1834,6 +1841,8 @@ namespace AsterNET.NetStandard.Manager
 #endif
                         }
                         retryCount++;
+                        if (retryCount == int.MaxValue)
+                            retryCount = reconnectRetryFast;
                     }
                 }
             }
@@ -2350,7 +2359,8 @@ namespace AsterNET.NetStandard.Manager
                 }
             }
 
-            if (response == null && buffer.ContainsKey("ping") && buffer["ping"] == "Pong")
+            if (response == null && buffer != null && ((buffer.ContainsKey("ping") && buffer["ping"] == "Pong") ||
+                (buffer.ContainsKey("response") && buffer["response"]=="Pong")))
             {
                 response = Helper.BuildResponse(buffer);
                 foreach (ResponseHandler pingHandler in pingHandlers.Values)

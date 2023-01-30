@@ -254,7 +254,7 @@ namespace AsterNET.NetStandard.FastAGI
                 logger.Info("AGI Server shut down.");
 #endif
 
-                throw ex;
+                throw;
             }
 
 #if LOGGER

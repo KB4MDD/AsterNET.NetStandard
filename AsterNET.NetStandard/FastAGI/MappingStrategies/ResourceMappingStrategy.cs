@@ -97,7 +97,7 @@ namespace AsterNET.NetStandard.FastAGI.MappingStrategies
 #if LOGGER
 					logger.Error("Resource bundle '" + resourceName + "' is missing.");
 #endif
-					throw ex;
+					throw ;
 				}
 			}
 		}

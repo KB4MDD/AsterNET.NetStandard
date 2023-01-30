@@ -789,7 +789,7 @@ namespace AsterNET.NetStandard
                     logger.Error("Unable to create new instance of " + eventType, ex);
                     return null;
 #else
-					throw ex;
+					throw ;
 #endif
                 }
             }

@@ -18,7 +18,8 @@ namespace AsterNET.NetStandard.Util
         public MD5Support(string algorithm)
         {
             var algorithmName = algorithm.Equals("SHA-1") ? "SHA" : algorithm;
-            _algorithm = (HashAlgorithm) CryptoConfig.CreateFromName(algorithmName);
+            //_algorithm = (HashAlgorithm)CryptoConfig.CreateFromName(algorithmName);
+            _algorithm = (HashAlgorithm)new MD5CryptoServiceProvider();
             data = new byte[0];
             _position = 0;
         }
