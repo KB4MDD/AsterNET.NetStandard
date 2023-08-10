@@ -16,7 +16,7 @@ namespace AsterNET.NetStandard.Manager
     public class ManagerReader
     {
 #if LOGGER
-		private readonly Logger logger = Logger.Instance();
+        private readonly Logger logger = Logger.Instance();
 #endif
 
         private readonly ManagerConnection mrConnector;
@@ -30,6 +30,7 @@ namespace AsterNET.NetStandard.Manager
         private readonly Queue<string> lineQueue;
         private ResponseHandler pingHandler;
         private bool processingCommandResult;
+        private bool processingMessageCommandResult;
         private bool wait4identiier;
         private DateTime lastPacketTime;
         private readonly Dictionary<string, string> packet;
@@ -142,14 +143,18 @@ namespace AsterNET.NetStandard.Manager
                             ? mrReader.lineBuffer.Substring(idx + 1)
                             : string.Empty);
                         lineQueue.Enqueue(line);
+#if LOGGER
+                        logger.Debug("Read Linne: {0}", line);
+#endif
+
                     }
                 // Give a next portion !!!
                 nstream.BeginRead(mrReader.lineBytes, 0, mrReader.lineBytes.Length, mrReaderCallbback, mrReader);
             }
 #if LOGGER
-			catch (Exception ex)
-			{
-				mrReader.logger.Error("Read data error", ex.Message);
+            catch (Exception ex)
+            {
+                mrReader.logger.Error("Read data error", ex.Message);
 #else
             catch
             {
@@ -266,7 +271,7 @@ namespace AsterNET.NetStandard.Manager
                         lock (((ICollection)lineQueue).SyncRoot)
                             line = lineQueue.Dequeue().Trim();
 #if LOGGER
-						logger.Debug(line);
+                        logger.Debug(line);
 #endif
 
                         #region processing Response: Follows
@@ -295,6 +300,19 @@ namespace AsterNET.NetStandard.Manager
                             continue;
                         }
 
+                        if (processingMessageCommandResult)
+                        {
+                            string lineLower = line.ToLower(Helper.CultureInfo);
+                            commandList.Add(line.Substring(7).Trim());
+                            var commandResponse = new CommandResponse();
+                            Helper.SetAttributes(commandResponse, packet);
+                            commandResponse.Result = commandList;
+                            processingMessageCommandResult = false;
+                            packet.Clear();
+                            mrConnector.DispatchResponse(commandResponse);
+                            continue;
+                        }
+
                         #endregion
 
                         #region collect key: value and ProtocolIdentifier
@@ -318,7 +336,18 @@ namespace AsterNET.NetStandard.Manager
                                 Helper.AddKeyValue(packet, line);
                                 continue;
                             }
+                            if (line.Trim().ToLower(Helper.CultureInfo) == "message: command output follows")
+                            {
+                                // Switch to wait message command mode
+                                processingMessageCommandResult = true;
+                                commandList.Clear();
+                                Helper.AddKeyValue(packet, line);
+                                continue;
+                            }
                             Helper.AddKeyValue(packet, line);
+#if LOGGER
+                        logger.Debug("Adding to Packet: {0}", line);
+#endif
                             continue;
                         }
 
@@ -341,9 +370,9 @@ namespace AsterNET.NetStandard.Manager
                     break;
                 }
 #if LOGGER
-				catch (Exception ex)
-				{
-					logger.Info("Exception : {0}", ex.Message);
+                catch (Exception ex)
+                {
+                    logger.Info("Exception : {0}", ex.Message);
 #else
                 catch
                 {
@@ -354,7 +383,7 @@ namespace AsterNET.NetStandard.Manager
                     break;
 
 #if LOGGER
-				logger.Info("No die, any error - send disconnect.");
+                logger.Info("No die, any error - send disconnect.");
 #endif
                 mrConnector.DispatchEvent(new DisconnectEvent(mrConnector));
             }

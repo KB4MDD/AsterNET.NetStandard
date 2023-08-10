@@ -114,7 +114,7 @@ namespace AsterNET.NetStandard.Manager
         #region Variables
 
 #if LOGGER
-		private Logger logger = Logger.Instance();
+        private Logger logger = Logger.Instance();
 #endif
         private long actionIdCount = 0;
         private string hostname;
@@ -1493,7 +1493,7 @@ namespace AsterNET.NetStandard.Manager
             if (reconnected)
             {
 #if LOGGER
-				logger.Error("Login during reconnect state.");
+                logger.Error("Login during reconnect state.");
 #endif
                 throw new AuthenticationFailedException("Unable login during reconnect state.");
             }
@@ -1540,7 +1540,7 @@ namespace AsterNET.NetStandard.Manager
                 {
                     disconnect(true);
 #if LOGGER
-					logger.Error("Unable to create login key using MD5 Message Digest.", ex);
+                    logger.Error("Unable to create login key using MD5 Message Digest.", ex);
 #endif
                     throw new AuthenticationFailedException("Unable to create login key using MD5 Message Digest.", ex);
                 }
@@ -1557,11 +1557,11 @@ namespace AsterNET.NetStandard.Manager
                 reconnectEnable = keepAlive;
 
 #if LOGGER
-				logger.Info("Successfully logged in");
+                logger.Info("Successfully logged in");
 #endif
                 asteriskVersion = determineVersion();
 #if LOGGER
-				logger.Info("Determined Asterisk version: " + asteriskVersion);
+                logger.Info("Determined Asterisk version: " + asteriskVersion);
 #endif
                 enableEvents = true;
                 ConnectEvent ce = new ConnectEvent(this);
@@ -1579,7 +1579,7 @@ namespace AsterNET.NetStandard.Manager
         #region determineVersion()
         protected internal AsteriskVersion determineVersion()
         {
-            Response.ManagerResponse response;
+            Response.ManagerResponse response = null;
             response = SendAction(new Action.CommandAction("core show version"), defaultResponseTimeout * 2);
             if (response is Response.CommandResponse)
             {
@@ -1625,6 +1625,36 @@ namespace AsterNET.NetStandard.Manager
                                 VAR_DELIMITER = new char[] { ',' };
                                 return Manager.AsteriskVersion.ASTERISK_13;
                             }
+                            else if (version.StartsWith("14."))
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_14;
+                            }
+                            else if (version.StartsWith("15."))
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_15;
+                            }
+                            else if (version.StartsWith("16."))
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_16;
+                            }
+                            else if (version.StartsWith("17."))
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_17;
+                            }
+                           else if (version.StartsWith("20."))
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_13;
+                            }
+                            else if (version.IndexOf('.') >= 2)
+                            {
+                                VAR_DELIMITER = new char[] { ',' };
+                                return Manager.AsteriskVersion.ASTERISK_Newer;
+                            }
                             else
                                 throw new ManagerException("Unknown Asterisk version " + version);
                         }
@@ -1660,7 +1690,7 @@ namespace AsterNET.NetStandard.Manager
                 if (mrSocket == null)
                 {
 #if LOGGER
-					logger.Info("Connecting to {0}:{1}", hostname, port);
+                    logger.Info("Connecting to {0}:{1}", hostname, port);
 #endif
                     try
                     {
@@ -1668,9 +1698,9 @@ namespace AsterNET.NetStandard.Manager
                         result = mrSocket.IsConnected;
                     }
 #if LOGGER
-					catch (Exception ex)
-					{
-						logger.Info("Connect - Exception  : {0}", ex.Message);
+                    catch (Exception ex)
+                    {
+                        logger.Info("Connect - Exception  : {0}", ex.Message);
 #else
                     catch
                     {
@@ -1759,7 +1789,7 @@ namespace AsterNET.NetStandard.Manager
         private void reconnect(bool init)
         {
 #if LOGGER
-			logger.Warning("reconnect (init: {0}), reconnectCount:{1}", init, reconnectCount);
+            logger.Warning("reconnect (init: {0}), reconnectCount:{1}", init, reconnectCount);
 #endif
             if (init || reconnectRetryMax < 0)
                 reconnectCount = 0;
@@ -1769,7 +1799,7 @@ namespace AsterNET.NetStandard.Manager
             if (reconnectEnable)
             {
 #if LOGGER
-				logger.Warning("Try reconnect.");
+                logger.Warning("Try reconnect.");
 #endif
                 enableEvents = false;
                 reconnected = true;
@@ -1782,7 +1812,7 @@ namespace AsterNET.NetStandard.Manager
                         reconnectEnable = false;
                     else
                     {
-                        if(retryCount % 12 == 0)
+                        if (retryCount % 12 == 0)
                         {
                             enableEvents = true;
                             fireEvent(new ReconnectEvent(this));
@@ -1795,7 +1825,7 @@ namespace AsterNET.NetStandard.Manager
                                 // Try to reconnect quite fast for the first times
                                 // this succeeds if the server has just been restarted
 #if LOGGER
-								logger.Info("Reconnect delay : {0}, retry : {1}", reconnectIntervalFast, retryCount);
+                                logger.Info("Reconnect delay : {0}, retry : {1}", reconnectIntervalFast, retryCount);
 #endif
                                 Thread.Sleep(reconnectIntervalFast);
                             }
@@ -1803,7 +1833,7 @@ namespace AsterNET.NetStandard.Manager
                             {
                                 // slow down after unsuccessful attempts assuming a shutdown of the server
 #if LOGGER
-								logger.Info("Reconnect delay : {0}, retry : {1}", reconnectIntervalMax, retryCount);
+                                logger.Info("Reconnect delay : {0}, retry : {1}", reconnectIntervalMax, retryCount);
 #endif
                                 Thread.Sleep(reconnectIntervalMax);
                             }
@@ -1813,9 +1843,9 @@ namespace AsterNET.NetStandard.Manager
                             continue;
                         }
 #if LOGGER
-						catch (Exception ex)
-						{
-							logger.Info("Reconnect delay exception : ", ex.Message);
+                        catch (Exception ex)
+                        {
+                            logger.Info("Reconnect delay exception : ", ex.Message);
 #else
                         catch
                         {
@@ -1826,15 +1856,15 @@ namespace AsterNET.NetStandard.Manager
                         try
                         {
 #if LOGGER
-							logger.Info("Try connect.");
+                            logger.Info("Try connect.");
 #endif
                             if (connect())
                                 break;
                         }
 #if LOGGER
-						catch(Exception ex)
-						{
-							logger.Info("Connect exception : ", ex.Message);
+                        catch (Exception ex)
+                        {
+                            logger.Info("Connect exception : ", ex.Message);
 #else
                         catch
                         {
@@ -1850,7 +1880,7 @@ namespace AsterNET.NetStandard.Manager
             if (!reconnectEnable)
             {
 #if LOGGER
-				logger.Info("Can't reconnect.");
+                logger.Info("Can't reconnect.");
 #endif
                 enableEvents = true;
                 reconnected = false;
@@ -2135,7 +2165,7 @@ namespace AsterNET.NetStandard.Manager
 
             string buffer = BuildAction(action, internalActionId);
 #if LOGGER
-			logger.Debug("Sent action : '{0}' : {1}", internalActionId, action);
+            logger.Debug("Sent action : '{0}' : {1}", internalActionId, action);
 #endif
             if (sa == null)
                 sa = new SendToAsteriskDelegate(sendToAsterisk);
@@ -2208,8 +2238,8 @@ namespace AsterNET.NetStandard.Manager
                 catch (UnauthorizedAccessException ex)
                 {
 #if LOGGER
-					logger.Error("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
-					continue;
+                    logger.Error("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
+                    continue;
 #else
                     throw new ManagerException("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
 #endif
@@ -2217,8 +2247,8 @@ namespace AsterNET.NetStandard.Manager
                 catch (TargetInvocationException ex)
                 {
 #if LOGGER
-					logger.Error("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
-					continue;
+                    logger.Error("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
+                    continue;
 #else
                     throw new ManagerException("Unable to retrieve property '" + name + "' of " + action.GetType(), ex);
 #endif
@@ -2294,7 +2324,7 @@ namespace AsterNET.NetStandard.Manager
         internal void DispatchResponse(Dictionary<string, string> buffer)
         {
 #if LOGGER
-			logger.Debug("Dispatch response packet : {0}", Helper.JoinVariables(buffer, ", ", ": "));
+            logger.Debug("Dispatch response packet : {0}", Helper.JoinVariables(buffer, ", ", ": "));
 #endif
             DispatchResponse(buffer, null);
         }
@@ -2302,7 +2332,7 @@ namespace AsterNET.NetStandard.Manager
         internal void DispatchResponse(ManagerResponse response)
         {
 #if LOGGER
-			logger.Debug("Dispatch response : {0}", response);
+            logger.Debug("Dispatch response : {0}", response);
 #endif
             DispatchResponse(null, response);
         }
@@ -2351,7 +2381,7 @@ namespace AsterNET.NetStandard.Manager
                     catch (Exception ex)
                     {
 #if LOGGER
-						logger.Error("Unexpected exception in responseHandler {0}\n{1}", response, ex);
+                        logger.Error("Unexpected exception in responseHandler {0}\n{1}", response, ex);
 #else
                         throw new ManagerException("Unexpected exception in responseHandler " + responseHandler.GetType().FullName, ex);
 #endif
@@ -2360,7 +2390,7 @@ namespace AsterNET.NetStandard.Manager
             }
 
             if (response == null && buffer != null && ((buffer.ContainsKey("ping") && buffer["ping"] == "Pong") ||
-                (buffer.ContainsKey("response") && buffer["response"]=="Pong")))
+                (buffer.ContainsKey("response") && buffer["response"] == "Pong")))
             {
                 response = Helper.BuildResponse(buffer);
                 foreach (ResponseHandler pingHandler in pingHandlers.Values)
@@ -2377,7 +2407,7 @@ namespace AsterNET.NetStandard.Manager
                 response.ActionId = responseActionId;
             }
 #if LOGGER
-			logger.Info("Reconnected - DispatchEvent : " + response);
+            logger.Info("Reconnected - DispatchEvent : " + response);
 #endif
             #region Support background reconnect
             if (response is ChallengeResponse)
@@ -2397,9 +2427,9 @@ namespace AsterNET.NetStandard.Manager
                         key = Helper.ToHexString(md.DigestData);
                     }
 #if LOGGER
-					catch (Exception ex)
-					{
-						logger.Error("Unable to create login key using MD5 Message Digest", ex);
+                    catch (Exception ex)
+                    {
+                        logger.Error("Unable to create login key using MD5 Message Digest", ex);
 #else
                     catch
                     {
@@ -2466,7 +2496,7 @@ namespace AsterNET.NetStandard.Manager
         internal void DispatchEvent(ManagerEvent e)
         {
 #if LOGGER
-			logger.Debug("Dispatching event: {0}", e);
+            logger.Debug("Dispatching event: {0}", e);
 #endif
 
             if (e is ResponseEvent)
@@ -2483,7 +2513,7 @@ namespace AsterNET.NetStandard.Manager
                         catch (SystemException ex)
                         {
 #if LOGGER
-						logger.Error("Unexpected exception", ex);
+                            logger.Error("Unexpected exception", ex);
 #else
                             throw ex;
 #endif
@@ -2496,7 +2526,7 @@ namespace AsterNET.NetStandard.Manager
             {
                 string protocol = ((ConnectEvent)e).ProtocolIdentifier;
 #if LOGGER
-				logger.Info("Connected via {0}", protocol);
+                logger.Info("Connected via {0}", protocol);
 #endif
                 if (!string.IsNullOrEmpty(protocol) && protocol.StartsWith("Asterisk Call Manager"))
                 {
@@ -2506,13 +2536,13 @@ namespace AsterNET.NetStandard.Manager
                 {
                     this.protocolIdentifier = (string.IsNullOrEmpty(protocol) ? "Empty" : protocol);
 #if LOGGER
-					logger.Warning("Unsupported protocol version '{0}'. Use at your own risk.", protocol);
+                    logger.Warning("Unsupported protocol version '{0}'. Use at your own risk.", protocol);
 #endif
                 }
                 if (reconnected)
                 {
 #if LOGGER
-					logger.Info("Send Challenge action.");
+                    logger.Info("Send Challenge action.");
 #endif
                     ChallengeAction challengeAction = new ChallengeAction();
                     try
@@ -2520,9 +2550,9 @@ namespace AsterNET.NetStandard.Manager
                         SendAction(challengeAction, null);
                     }
 #if LOGGER
-					catch(Exception ex)
-					{
-						logger.Info("Send Challenge fail : ", ex.Message);
+                    catch (Exception ex)
+                    {
+                        logger.Info("Send Challenge fail : ", ex.Message);
 #else
                     catch
                     {
