@@ -1595,12 +1595,12 @@ namespace AsterNET.NetStandard.Manager
                                 VAR_DELIMITER = new char[] { '|' };
                                 return AsteriskVersion.ASTERISK_1_4;
                             }
-                            else if (version.StartsWith("1.6."))
+                            else if (version.StartsWith("1.6.") )
                             {
                                 VAR_DELIMITER = new char[] { '|' };
                                 return Manager.AsteriskVersion.ASTERISK_1_6;
                             }
-                            else if (version.StartsWith("1.8."))
+                            else if (version.StartsWith("1.8.") )
                             {
                                 VAR_DELIMITER = new char[] { '|' };
                                 return Manager.AsteriskVersion.ASTERISK_1_8;
@@ -1656,7 +1656,8 @@ namespace AsterNET.NetStandard.Manager
                                 return Manager.AsteriskVersion.ASTERISK_Newer;
                             }
                             else
-                                throw new ManagerException("Unknown Asterisk version " + version);
+                                return Manager.AsteriskVersion.ASTERISK_1_6;
+                            //throw new ManagerException("Unknown Asterisk version " + version);
                         }
                     }
                 }
