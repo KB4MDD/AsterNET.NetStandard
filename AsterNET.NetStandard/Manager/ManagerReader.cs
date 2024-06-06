@@ -161,7 +161,7 @@ namespace AsterNET.NetStandard.Manager
 #endif
                 // Any catch - disconncatch !
                 disconnect = true;
-                mrReader.mrSocket!.Close();
+                mrReader.mrSocket?.Close();
                 mrReader.mrSocket = null;
             }
         }
